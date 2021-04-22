@@ -6,13 +6,9 @@
 #define t 0.01
 using namespace std;
 
-bool flag(double* rightResult, double normB, int rank, int* numberOfElements) {
-	double sqrTop = 0;
-	for (int i = 0; i < numberOfElements[rank]; ++i) {
-		sqrTop += rightResult[i] * rightResult[i];
-	}
+bool flag(double norm, double normB, int rank) {
 	double temp = 0;
-	MPI_Allreduce(&sqrTop, &temp, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	MPI_Allreduce(&norm, &temp, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	temp = sqrt(temp / normB);
 	return temp > e;
 }
@@ -29,6 +25,7 @@ int main(int argc, char* argv[])
 	double* A = NULL;
 	double* X = new double[MATRIX_SIZE];
 	double* B = new double[MATRIX_SIZE];
+	double norm;
 	double normB = 0.0;
 
 	int* rows_at_process = new int[size];//массив кол-ва строк по процессам
@@ -63,18 +60,19 @@ int main(int argc, char* argv[])
 	}
 	
 	double* rightResult = new double[rows_at_process[rank]];
-
-	for (int i = 0; i < rows_at_process[rank]; ++i) { //при x0 = 0  посчитали Ax-b
+	for (int i = 0; i < rows_at_process[rank]; ++i) { 
 		rightResult[i] = (-1) * B[i + shift[rank]];
+		norm = rightResult[i] * rightResult[i];
 	}
 	int exitCond = 0;
 
-	while (flag(rightResult, normB, rank, rows_at_process)) {
+	while (flag(norm, normB, rank)) {
+		norm = 0.0;
 		for (int i = 0; i < rows_at_process[rank]; ++i) {
 			Xn[i] = X[i + shift[rank]] - t * rightResult[i];
 		}
 
-		MPI_Allgatherv(Xn, rows_at_process[rank], MPI_DOUBLE, X, rows_at_process, shift, MPI_DOUBLE, MPI_COMM_WORLD); // собираем новый x отовсюду
+		MPI_Allgatherv(Xn, rows_at_process[rank], MPI_DOUBLE, X, rows_at_process, shift, MPI_DOUBLE, MPI_COMM_WORLD); // собираем новый x от всех процессов
 
 		for (int j = 0; j < rows_at_process[rank]; ++j) {
 			double result = 0;
@@ -82,10 +80,10 @@ int main(int argc, char* argv[])
 				result += A[i + j * MATRIX_SIZE] * X[i];
 			}
 			rightResult[j] = result - B[j];
+			norm = rightResult[j] * rightResult[j];
 		}
 	}
 
-	cout << rank << " of " << size << "\n";
 	free(shift);
 	delete[] A;
 	delete[] B;
@@ -101,5 +99,6 @@ int main(int argc, char* argv[])
 	}
 	
 	MPI_Finalize();
+
 	return 0;
 }
