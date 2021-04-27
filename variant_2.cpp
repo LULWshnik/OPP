@@ -63,7 +63,8 @@ int main(int argc, char* argv[])
 		rows_at_process[i] = (MATRIX_SIZE / size) + ((i < MATRIX_SIZE % size) ? (1) : (0));//распределяем строки по процессам 
 	}
 
-	int* shift = (int*)calloc(size, sizeof(int));
+	int* shift = new int[size];
+	fill(shift, shift + size, 0);
 	for (int i = 1; i < size; ++i) {
 		shift[i] = shift[i - 1] + rows_at_process[i - 1];
 	}
