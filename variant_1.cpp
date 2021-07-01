@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 	}
 	double startTime = omp_get_wtime();
 	int exitCond = 0;
-	while ((flag(rightResult, B, sqrB) && (exitCond < 10000)))
+	while ((flag(rightResult, B, sqrB)) && (exitCond < 10000))
 	{
 #pragma omp parallel for
 		for (int i = 0; i < MATRIX_SIZE; ++i) {
