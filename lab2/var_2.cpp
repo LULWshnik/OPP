@@ -1,5 +1,6 @@
 #include "omp.h"
 #include <iostream>
+#include <cmath>
 
 #define e 0.000001
 #define MATRIX_SIZE 5500
@@ -15,13 +16,10 @@ void right(double* A, double* b, double* xn, double* rightResult) {
 		}
 		rightResult[j] -= b[j];
 	}
-	return;
 }
 
-double sqrTop = 0;
-
 bool flag(double* rightResult, double* b, double sqrB) {
-	sqrTop = 0;
+	double sqrTop = 0;
 #pragma omp for reduction(+:sqrTop) 
 	for (int i = 0; i < MATRIX_SIZE; ++i) {
 		sqrTop += rightResult[i] * rightResult[i];
@@ -47,7 +45,7 @@ int main(int argc, char** argv) {
 		B[i] = MATRIX_SIZE + 1;
 	}
 
-	double* rightResult = (double*)calloc(MATRIX_SIZE, sizeof(double));
+	double* rightResult = new double[MATRIX_SIZE];
 	for (int i = 0; i < MATRIX_SIZE; ++i) {
 		rightResult[i] = (-1) * B[i];
 	}
@@ -58,7 +56,7 @@ int main(int argc, char** argv) {
 	}
 
 	double startTime = omp_get_wtime();
-#pragma omp parallel num_threads(1)
+#pragma omp parallel num_threads(4)
 	{
 		int exitCond = 0;
 		while ((flag(rightResult, B, sqrB)) && (exitCond < 10000))
@@ -74,10 +72,10 @@ int main(int argc, char** argv) {
 	double endTime = omp_get_wtime();
 
 
-	double temp = fabs(Xn[0]);
+	double temp = abs(Xn[0]);
 	for (int i = 0; i < MATRIX_SIZE; ++i) {
-		if (temp < fabs(Xn[i])) {
-			temp = fabs(Xn[i]);
+		if (temp < abs(Xn[i])) {
+			temp = abs(Xn[i]);
 		}
 	}
 
