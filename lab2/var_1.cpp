@@ -1,5 +1,6 @@
 #include "omp.h"
 #include <iostream>
+#include <cmath>
 
 #define e 0.000001
 #define MATRIX_SIZE 5500
@@ -15,7 +16,6 @@ void right(double* A, double* b, double* xn, double* rightResult) {
 		}
 		rightResult[j] -= b[j];
 	}
-	return;
 }
 bool flag(double* rightResult, double* b, double sqrB) {
 	double sqrTop = 0;
@@ -65,10 +65,10 @@ int main(int argc, char** argv) {
 	}
 	double endTime = omp_get_wtime();
 
-	double temp = fabs(Xn[0]);
+	double temp = abs(Xn[0]);
 	for (int i = 0; i < MATRIX_SIZE; ++i) {
-		if (temp < fabs(Xn[i])) {
-			temp = fabs(Xn[i]);
+		if (temp < abs(Xn[i])) {
+			temp = abs(Xn[i]);
 		}
 	}
 
