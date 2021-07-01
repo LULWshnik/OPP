@@ -56,7 +56,6 @@ int main(int argc, char** argv) {
 	}
 
 	double startTime = omp_get_wtime();
-#pragma omp parallel num_threads(4)
 	{
 		int exitCond = 0;
 		while ((flag(rightResult, B, sqrB)) && (exitCond < 10000))
