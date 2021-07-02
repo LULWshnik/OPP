@@ -53,15 +53,13 @@ int main(int argc, char** argv) {
 		sqrB += B[i] * B[i];
 	}
 	double startTime = omp_get_wtime();
-	int exitCond = 0;
-	while ((flag(rightResult, B, sqrB)) && (exitCond < 10000))
+	while (flag(rightResult, B, sqrB))
 	{
 #pragma omp parallel for
 		for (int i = 0; i < MATRIX_SIZE; ++i) {
 			Xn[i] = Xn[i] - t * rightResult[i];
 		}
 		right(A, B, Xn, rightResult);
-		++exitCond;
 	}
 	double endTime = omp_get_wtime();
 
